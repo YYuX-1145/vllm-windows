@@ -1,5 +1,5 @@
 # Common dependencies
---extra-index-url https://download.pytorch.org/whl/cu126
+--extra-index-url https://download.pytorch.org/whl/cu128
 -r common.txt
 
 numba == 0.60.0; python_version == '3.9' # v0.61 doesn't support Python 3.9. Required for N-gram speculative decoding
@@ -7,8 +7,7 @@ numba == 0.61.2; python_version > '3.9'
 
 # Dependencies for NVIDIA GPUs
 ray[cgraph]>=2.48.0 # Ray Compiled Graph, required for pipeline parallelism in V1.
-torch==2.7.1+cu126
-torchaudio==2.7.1+cu126
+torch==2.7.1+cu128
 # These must be updated alongside torch
 torchvision==0.22.1+cu126 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
 # https://github.com/facebookresearch/xformers/releases/tag/v0.0.31.post1
