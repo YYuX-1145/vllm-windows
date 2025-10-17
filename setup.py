@@ -742,7 +742,7 @@ else:
 
 setup(
     # static metadata should rather go in pyproject.toml
-    version=get_vllm_version(),
+    version="0.10.2",
     ext_modules=ext_modules,
     install_requires=get_requirements(),
     extras_require={

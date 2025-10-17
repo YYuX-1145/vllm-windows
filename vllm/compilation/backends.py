@@ -92,7 +92,7 @@ class CompilerManager:
 
         if not disable_cache and os.path.exists(self.cache_file_path):
             # load the cache from the file
-            with open(self.cache_file_path) as f:
+            with open(self.cache_file_path, encoding="utf-8") as f:
                 # we use ast.literal_eval to parse the data
                 # because it is a safe way to parse Python literals.
                 # do not use eval(), it is unsafe.
@@ -499,7 +499,7 @@ class VllmBackend:
                     # This means the function was dynamically generated, with
                     # e.g. exec(). We can't actually check these.
                     continue
-                with open(filepath) as f:
+                with open(filepath, encoding="utf-8") as f:
                     hash_content.append(f.read())
             import hashlib
             code_hash = hashlib.md5("\n".join(hash_content).encode(),

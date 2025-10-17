@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
-
+import tempfile
 import os
 import platform
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
@@ -29,7 +29,8 @@ class UniProcExecutor(ExecutorBase):
         self.driver_worker = WorkerWrapperBase(vllm_config=self.vllm_config,
                                                rpc_rank=0)
         if platform.system() == "Windows":
-            distributed_init_method = "file:///c:/Users/SystemPanic/Desktop/vllm_distributed_method_file"
+            temp_dir = tempfile.gettempdir()
+            distributed_init_method = f"file:///{os.path.join(temp_dir, 'vllm_distributed_method_file')}"
         else:
             distributed_init_method = get_distributed_init_method(
                 get_ip(), get_open_port())
