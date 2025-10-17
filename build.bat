@@ -1,5 +1,6 @@
 set DISTUTILS_USE_SDK=1
 set VLLM_TARGET_DEVICE=cuda
+set TORCH_CUDA_ARCH_LIST=7.5;8.6;8.9;12.0+PTX
 set MAX_JOBS=24
 
 set PYTHON=E:\index-tts2\indextts2runtime\
