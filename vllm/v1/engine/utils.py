@@ -624,8 +624,8 @@ def launch_core_engines(
 
     # Set up input and output addresses.
     if platform.system() == "Windows":
-        input_address_port = 45974
-        output_address_port = 45975
+        input_address_port = parallel_config.data_parallel_rpc_port
+        output_address_port = input_address_port + 1
         addresses = EngineZmqAddresses(
             inputs=[
                 get_engine_client_zmq_addr(client_local_only, host, input_address_port - num_api_index)

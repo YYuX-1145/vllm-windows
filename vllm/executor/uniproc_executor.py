@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
 import tempfile
 import os
+import uuid
 import platform
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -30,7 +31,7 @@ class UniProcExecutor(ExecutorBase):
                                                rpc_rank=0)
         if platform.system() == "Windows":
             temp_dir = tempfile.gettempdir()
-            distributed_init_method = f"file:///{os.path.join(temp_dir, 'vllm_distributed_method_file')}"
+            distributed_init_method = f"file:///{os.path.join(temp_dir, 'vllm_distributed_'+uuid.uuid4().hex)}"
         else:
             distributed_init_method = get_distributed_init_method(
                 get_ip(), get_open_port())
