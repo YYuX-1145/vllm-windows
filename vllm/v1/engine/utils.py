@@ -4,6 +4,8 @@
 import contextlib
 import platform
 import os
+import socket
+from random import randint
 import weakref
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -622,17 +624,39 @@ def launch_core_engines(
     client_local_only = (offline_mode or local_engines_only
                          or (local_engine_count == dp_size))
 
+    def find_free_port(start_port: int, direction: str = "up", max_tries: int = 500, host: str = "127.0.0.1") -> int:
+        if direction not in ("up", "down"):
+            raise ValueError("direction must be 'up' or 'down'")
+        step = 1 if direction == "up" else -1
+        port = start_port
+        for _ in range(max_tries):
+            if 0 < port < 65536:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.settimeout(0.5)
+                    try:
+                        s.bind((host, port))
+                        return port
+                    except OSError:
+                        port += step
+            else:
+                break
+        raise RuntimeError(f"Can not find a free port. Max tries:{max_tries}")
+
     # Set up input and output addresses.
     if platform.system() == "Windows":
         input_address_port = parallel_config.data_parallel_rpc_port
+        for _ in range(20):
+            input_address_port = randint(10000, 60000)
+            if input_address_port > parallel_config.data_parallel_rpc_port + 10 + num_api_servers or input_address_port < parallel_config.data_parallel_rpc_port - 10 - num_api_servers:
+                break
         output_address_port = input_address_port + 1
         addresses = EngineZmqAddresses(
             inputs=[
-                get_engine_client_zmq_addr(client_local_only, host, input_address_port - num_api_index)
+                get_engine_client_zmq_addr(client_local_only, host, find_free_port(input_address_port - num_api_index, "down"))
                 for num_api_index in range(num_api_servers)
             ],
             outputs=[
-                get_engine_client_zmq_addr(client_local_only, host, output_address_port + num_api_index)
+                get_engine_client_zmq_addr(client_local_only, host, find_free_port(output_address_port + num_api_index, "up"))
                 for num_api_index in range(num_api_servers)
             ],
         )
