@@ -21,8 +21,21 @@ if(QUTLASS_SRC_DIR)
   set(qutlass_SOURCE_DIR "${QUTLASS_SRC_DIR}")
   set(qutlass_BINARY_DIR "${CMAKE_BINARY_DIR}/qutlass-binary-dir-unused")
 else()
-  set(_QUTLASS_UPSTREAM_REPO "https://github.com/IST-DASLab/qutlass.git")
-  set(_QUTLASS_UPSTREAM_TAG "830d2c4537c7396e14a02a46fbddd18b5d107c65")
+  if(WIN32)
+    set(QUTLASS_GIT "https://github.com/SystemPanic/qutlass.git")
+    set(QUTLASS_REV "2d26c3357de7935d839cd9b88638dac3da2a5d9b")
+  else()
+    set(QUTLASS_GIT "https://github.com/IST-DASLab/qutlass.git")
+    set(QUTLASS_REV "830d2c4537c7396e14a02a46fbddd18b5d107c65")
+  endif()
+  FetchContent_Declare(
+    qutlass
+    GIT_REPOSITORY ${QUTLASS_GIT}
+    GIT_TAG ${QUTLASS_REV}
+    GIT_PROGRESS TRUE
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+  )
 
   set(_qutlass_fc_root "${FETCHCONTENT_BASE_DIR}")
   if(NOT _qutlass_fc_root)
