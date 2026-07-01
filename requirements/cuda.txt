@@ -35,4 +35,4 @@ tokenspeed-mla==0.1.2; sys_platform != "win32"
 
 # Humming kernels for quantization gemm
 humming-kernels[cu13]==0.1.6; sys_platform != "win32"
-humming-kernels[cu13] @ https://github.com/SystemPanic/humming-windows/archive/refs/tags/v0.1.4.tar.gz ; sys_platform == "win32"
+humming-kernels[cu13] @ https://github.com/SystemPanic/humming-windows/archive/refs/tags/v0.1.7.tar.gz ; sys_platform == "win32"
