@@ -11,8 +11,9 @@ from multiprocessing import shared_memory
 from pickle import PickleBuffer
 from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import patch
-import platform
 
+import os
+import platform
 import torch
 import torch.distributed as dist
 import zmq
@@ -402,10 +403,10 @@ class MessageQueue:
             self.local_socket.setsockopt(XPUB_VERBOSE, True)
             if platform.system() == "Windows":
                 local_subscribe_addr = get_engine_client_zmq_addr(
-                    False, None, get_open_port()
+                    False, os.getenv("VLLM_HOST", "127.0.0.1"), get_open_port()
                 )
                 local_notify_addr = get_engine_client_zmq_addr(
-                    False, None, get_open_port()
+                    False, os.getenv("VLLM_HOST", "127.0.0.1"), get_open_port()
                 )
             else:
                 local_subscribe_addr = get_open_zmq_ipc_path()

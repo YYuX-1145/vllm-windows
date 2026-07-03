@@ -335,6 +335,7 @@ def find_loaded_library(lib_name: str) -> str | None:
             f"Unexpected filename: {filename} for library {lib_name}"
         )
     elif "cudart" in lib_name:
+        import torch
         cudart_path = os.getenv("VLLM_CUDART_SO_PATH", None)
         if cudart_path is None:
             cuda_path = None
