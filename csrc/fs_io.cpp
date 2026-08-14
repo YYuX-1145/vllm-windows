@@ -3,7 +3,11 @@
 
 #include <Python.h>
 
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include <vector>
 
@@ -12,7 +16,11 @@ extern "C" {
 static void _batch_lookup(const std::vector<const char*>& paths,
                           std::vector<int>& exists_flags) {
   for (size_t i = 0; i < paths.size(); i++) {
+#ifdef _WIN32
+    exists_flags[i] = (_access(paths[i], 0) == 0) ? 1 : 0;
+#else
     exists_flags[i] = (access(paths[i], F_OK) == 0) ? 1 : 0;
+#endif
   }
 }
 

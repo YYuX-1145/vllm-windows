@@ -75,18 +75,18 @@ __device__ __forceinline__ void mbarrier_init(uint64_t* a, uint32_t n) {
   cuda::ptx::mbarrier_init(a, n);
 }
 __device__ __forceinline__ void mbarrier_wait(uint64_t* a, uint32_t p) {
-  while (!cuda::ptx::mbarrier_try_wait_parity(cuda::ptx::sem_relaxed,
+  while (!cuda::ptx::mbarrier_try_wait_parity(cuda::ptx::sem_acquire,
                                               cuda::ptx::scope_cta, a, p));
 }
 __device__ __forceinline__ void mbarrier_arrive_expect_tx(uint64_t* a,
                                                           uint32_t t) {
-  cuda::ptx::mbarrier_arrive_expect_tx(cuda::ptx::sem_relaxed,
+  cuda::ptx::mbarrier_arrive_expect_tx(cuda::ptx::sem_release,
                                        cuda::ptx::scope_cta,
                                        cuda::ptx::space_shared, a, t);
 }
 __device__ __forceinline__ void tma_load(void* d, const void* s, uint32_t n,
                                          uint64_t* m) {
-  cuda::ptx::cp_async_bulk(cuda::ptx::space_shared, cuda::ptx::space_global, d,
+  cuda::ptx::cp_async_bulk(cuda::ptx::space_cluster, cuda::ptx::space_global, d,
                            s, n, m);
 }
 

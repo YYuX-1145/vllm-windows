@@ -4,9 +4,6 @@
 #include <torch/csrc/stable/library.h>
 #include <torch/csrc/stable/tensor.h>
 #include <torch/headeronly/core/ScalarType.h>
-#ifdef _WIN32
-  #include <cublas_api.h>
-#endif
 #include <cublas_v2.h>
 
 #include "core/registration.h"

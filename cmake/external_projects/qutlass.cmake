@@ -54,8 +54,8 @@ else()
       SUBBUILD_DIR "${_qutlass_sub}"
       SOURCE_DIR "${_qutlass_src}"
       BINARY_DIR "${_qutlass_bin}"
-      GIT_REPOSITORY "${_QUTLASS_UPSTREAM_REPO}"
-      GIT_TAG "${_QUTLASS_UPSTREAM_TAG}"
+      GIT_REPOSITORY "${QUTLASS_GIT}"
+      GIT_TAG "${QUTLASS_REV}"
       GIT_PROGRESS TRUE
     )
   endif()
