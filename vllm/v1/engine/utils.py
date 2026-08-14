@@ -3,8 +3,8 @@
 
 import contextlib
 import os
-import threading
 import platform
+import threading
 import weakref
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
@@ -1174,10 +1174,13 @@ def launch_core_engines(
     if parallel_config.enable_elastic_ep:
         handshake_local_only = False
 
-    # Preserve "port=0 means auto-pick" for the handshake address, which
-    # is consumed by engines spawned in this process and so cannot defer
-    # port resolution to bind time.
-    rpc_port = parallel_config.data_parallel_rpc_port or get_open_port()
+    # Let ZMQ/the kernel allocate the handshake port at bind time when the
+    # user did not request a fixed port. Using get_open_port() here creates a
+    # TOCTOU window: another vLLM process can claim the probed port before the
+    # ROUTER socket binds it (especially common with concurrent Windows
+    # launches). The concrete endpoint is recovered below before children are
+    # started.
+    rpc_port = parallel_config.data_parallel_rpc_port or 0
     if platform.system() == "Windows":
         handshake_local_only = False
     handshake_address = get_engine_client_zmq_addr(handshake_local_only, host, rpc_port)
@@ -1186,7 +1189,7 @@ def launch_core_engines(
         assert not handshake_local_only
         if platform.system() == "Windows":
             local_handshake_address = get_engine_client_zmq_addr(
-                handshake_local_only, host, get_open_port()
+                handshake_local_only, host, 0
             )
         else:
             local_handshake_address = get_open_zmq_ipc_path()
@@ -1198,6 +1201,17 @@ def launch_core_engines(
     with zmq_socket_ctx(
         local_handshake_address, zmq.ROUTER, bind=True
     ) as handshake_socket:
+        bound_handshake_address = handshake_socket.getsockopt(
+            zmq.LAST_ENDPOINT
+        ).decode()
+        if client_handshake_address is None:
+            # Rank 0/local-only engines connect to the socket bound above.
+            handshake_address = bound_handshake_address
+        else:
+            # A non-primary Windows rank uses a separate local handshake
+            # socket for its child engines.
+            client_handshake_address = bound_handshake_address
+
         # Start local engines.
         if local_engine_count:
             local_engine_manager = CoreEngineProcManager(

@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
 import os
+import platform
+import tempfile
+import uuid
 from collections.abc import Callable
 from concurrent.futures import Future
 from multiprocessing import Lock
@@ -70,7 +73,17 @@ class UniProcExecutor(Executor):
 
     def _distributed_args(self) -> tuple[str, int, int]:
         """Return (distributed_init_method, rank, local_rank)."""
-        distributed_init_method = get_distributed_init_method(get_ip(), get_open_port())
+        if platform.system() == "Windows":
+            # A unique file rendezvous avoids the free-port probe/bind race
+            # when several independent vLLM processes start concurrently.
+            rendezvous_file = os.path.join(
+                tempfile.gettempdir(), f"vllm_distributed_{uuid.uuid4().hex}"
+            )
+            distributed_init_method = f"file:///{rendezvous_file}"
+        else:
+            distributed_init_method = get_distributed_init_method(
+                get_ip(), get_open_port()
+            )
         # set local rank as the device index if specified
         device_info = self.vllm_config.device_config.device.__str__().split(":")
         local_rank = int(device_info[1]) if len(device_info) > 1 else 0

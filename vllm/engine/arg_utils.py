@@ -2058,11 +2058,19 @@ class EngineArgs:
 
         # This port is only used when there are remote data parallel engines,
         # otherwise the local IPC transport is used.
-        data_parallel_rpc_port = (
-            self.data_parallel_rpc_port
-            if (self.data_parallel_rpc_port is not None)
-            else ParallelConfig.data_parallel_rpc_port
-        )
+        if self.data_parallel_rpc_port is not None:
+            # An explicitly configured port must remain stable for remote DP
+            # engines to connect to it.
+            data_parallel_rpc_port = self.data_parallel_rpc_port
+        elif sys.platform == "win32":
+            # Local engine communication uses TCP rather than IPC on Windows.
+            # Keeping the conventional default (29550) makes independent vLLM
+            # instances collide. Zero tells ZMQ to allocate a free port at
+            # bind time; launch_core_engines resolves the concrete endpoint
+            # before spawning local engine processes.
+            data_parallel_rpc_port = 0
+        else:
+            data_parallel_rpc_port = ParallelConfig.data_parallel_rpc_port
 
         if self.tokens_only and not model_config.skip_tokenizer_init:
             model_config.skip_tokenizer_init = True
